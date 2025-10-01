@@ -1,168 +1,235 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>💬 Chatbot Multi Sistema — Memory</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Chat Multi Sistema — Memory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root{
       --memory-red:#E50914;
       --memory-red-700:#b0060f;
-      --gray-900:#2B2E34;
-      --gray-800:#363A40;
-      --gray-700:#4B4F56;
-      --gray-400:#C9CCD1;
-      --gray-200:#E9EBEF;
       --gray-100:#F5F6F7;
-      --white:#FFFFFF;
-      --radius-lg:20px;
-      --radius-md:12px;
-      --shadow-lg:0 20px 60px rgba(0,0,0,.18);
-      --shadow-sm:0 2px 10px rgba(0,0,0,.08);
+      --gray-200:#E9EBEF;
+      --gray-300:#D8DCE2;
+      --gray-600:#4B4F56;
+      --gray-800:#2F3238;
+      --white:#ffffff;
+      --radius:14px;
     }
+
     *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
     body{
       font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       background:radial-gradient(1200px 700px at 20% -10%,#ffffff 0%,#f2f3f5 40%,#e9ebef 100%);
-      display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;color:var(--gray-700);
+      color:var(--gray-600);
     }
-    .container{
-      width:100%;max-width:880px;height:85vh;background:var(--white);
-      border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);
-      overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--gray-200);
+
+    /* Layout de página inteira (estilo ChatGPT) */
+    .app{
+      display:grid;
+      grid-template-columns: 1fr 360px; /* chat | guia */
+      grid-template-rows: 64px 1fr;
+      grid-template-areas:
+        "topbar right"
+        "chat   right";
+      height:100vh;
+      gap:0;
     }
-    header{
-      background:var(--gray-900);
+
+    /* Topbar */
+    .topbar{
+      grid-area:topbar;
+      display:flex;align-items:center;gap:12px;
+      padding:0 18px;
+      background:var(--gray-800);
       color:var(--white);
-      padding:18px 22px;
-      display:flex;align-items:center;gap:14px;
-      box-shadow:var(--shadow-sm);
+      border-bottom:1px solid rgba(255,255,255,.06);
     }
-    header .brand{display:flex;align-items:center;gap:10px}
-    header .brand img{height:28px;width:auto;display:block}
-    header h1{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:.2px}
-    header p{font-size:12px;opacity:.85}
-    #chatBox{display:none;flex-direction:column;flex:1;background:var(--gray-100)}
-    #chatBox.active{display:flex}
+    #logoMemory{
+      height:28px;width:auto;display:block;
+    }
+    .title{
+      font-weight:700;letter-spacing:.2px;font-size:16px;line-height:1;
+    }
+    .subtitle{font-size:12px;opacity:.8}
+
+    /* Lateral direita (guia) */
+    .right{
+      grid-area:right;
+      display:flex;flex-direction:column;
+      border-left:1px solid var(--gray-200);
+      background:var(--white);
+      height:100%;
+    }
+    .right header{
+      padding:16px 18px;border-bottom:1px solid var(--gray-200);
+      font-weight:700;color:#1d1f24;
+    }
+    .guide{
+      padding:16px 18px;overflow:auto;
+      scrollbar-width:thin;scrollbar-color:var(--memory-red) transparent;
+    }
+    .guide::-webkit-scrollbar{width:10px}
+    .guide::-webkit-scrollbar-thumb{background:var(--memory-red);border-radius:10px;border:2px solid transparent}
+    .guide section{margin-bottom:18px}
+    .guide h4{font-size:13px;color:#1d1f24;margin-bottom:8px}
+    .guide p, .guide li{font-size:13px;line-height:1.55}
+    .guide ul{padding-left:18px}
+
+    /* Área do chat */
+    .chat{
+      grid-area:chat;
+      display:flex;flex-direction:column;height:100%;
+      background:var(--gray-100);
+    }
+
+    .suggestions{
+      padding:14px 18px;border-bottom:1px solid var(--gray-200);
+      display:flex;flex-wrap:wrap;gap:10px;background:#fff;
+    }
+    .chip{
+      border:1px solid var(--gray-300);
+      background:#fff;color:#1d1f24;
+      padding:8px 12px;border-radius:999px;font-size:12.5px;
+      cursor:pointer;transition:all .15s ease;
+    }
+    .chip:hover{border-color:var(--memory-red);color:var(--memory-red)}
+
     #chat{
-      flex:1;padding:22px;overflow-y:auto;background:var(--gray-100);font-size:15px;
-      scroll-behavior:smooth;
+      flex:1;overflow:auto;padding:20px;
       scrollbar-width:thin;scrollbar-color:var(--memory-red) transparent;
     }
     #chat::-webkit-scrollbar{width:10px}
-    #chat::-webkit-scrollbar-track{background:transparent}
-    #chat::-webkit-scrollbar-thumb{
-      background:var(--memory-red);
-      border-radius:10px;border:2px solid var(--gray-100);
-    }
-    #chat::-webkit-scrollbar-thumb:hover{background:var(--memory-red-700)}
+    #chat::-webkit-scrollbar-thumb{background:var(--memory-red);border-radius:10px;border:2px solid var(--gray-100)}
+
     .message{
-      margin:12px 0;max-width:75%;padding:12px 16px;border-radius:16px;
-      line-height:1.55;word-wrap:break-word;font-size:14px;animation:slideIn .25s ease;
+      max-width:75%;padding:12px 16px;border-radius:16px;
+      line-height:1.6;font-size:14px;margin:10px 0;
       box-shadow:0 1px 4px rgba(0,0,0,.06);
+      animation:slide .22s ease;
     }
-    @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    .user{
-      margin-left:auto;background:var(--memory-red);color:var(--white);
-      border-bottom-right-radius:6px;
-    }
-    .bot{
-      margin-right:auto;background:var(--white);color:var(--gray-800);
-      border:1px solid var(--gray-200);border-bottom-left-radius:6px;
-    }
-    .bot strong{color:var(--gray-900)}
+    @keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    .user{margin-left:auto;background:var(--memory-red);color:#fff;border-bottom-right-radius:6px}
+    .bot{margin-right:auto;background:#fff;color:#1d1f24;border:1px solid var(--gray-200);border-bottom-left-radius:6px}
+    .bot strong{color:#111}
+
     .status{
-      text-align:center;font-size:12.5px;color:var(--gray-700);
-      margin:10px auto;padding:8px 12px;background:#fff;border-radius:999px;
-      display:block;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--gray-200)
+      text-align:center;font-size:12.5px;color:#333;margin:10px auto;
+      padding:8px 12px;background:#fff;border-radius:999px;border:1px solid var(--gray-200)
     }
     .typing{display:inline-flex;gap:4px;align-items:center;margin-right:6px}
-    .typing span{
-      width:7px;height:7px;background:var(--memory-red);border-radius:50%;
-      animation:typing 1.4s infinite
-    }
+    .typing span{width:7px;height:7px;background:var(--memory-red);border-radius:50%;animation:typing 1.4s infinite}
     .typing span:nth-child(2){animation-delay:.2s}
     .typing span:nth-child(3){animation-delay:.4s}
     @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
-    .system-badge{
-      display:inline-block;padding:4px 10px;background:var(--memory-red);
-      color:var(--white);border-radius:999px;font-size:11px;font-weight:700;margin-left:8px
-    }
-    .error{background:#fff3f3;color:#9f1f1f;border-left:4px solid #c33}
-    #configBox{padding:26px 26px 28px;background:var(--white);display:block}
-    #configBox.hidden{display:none}
-    #configBox .info{
-      background:var(--gray-100);padding:14px;border-radius:12px;margin-bottom:18px;
-      border:1px solid var(--gray-200)
-    }
-    #configBox label{display:block;margin-bottom:8px;font-weight:700;color:var(--gray-800);font-size:13px}
-    #configBox input,#configBox select{width:100%;margin-bottom:18px}
+
     .controls{
-      padding:16px 18px;background:var(--white);display:flex;gap:10px;border-top:1px solid var(--gray-200)
+      padding:14px 18px;background:#fff;border-top:1px solid var(--gray-200);
+      display:flex;gap:10px;
     }
     input,select,button{
       padding:12px 14px;border-radius:12px;border:1px solid var(--gray-200);
-      font-size:14px;font-family:inherit;background:var(--white)
+      font-size:14px;font-family:inherit;background:#fff
     }
     input[type="text"]{flex:1;outline:none;transition:all .2s}
     input[type="text"]:focus{border-color:var(--memory-red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
-    select{cursor:pointer;outline:none}
     button{
-      background:var(--memory-red);color:var(--white);border:none;cursor:pointer;
-      transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-      font-weight:700;min-width:110px;box-shadow:0 6px 16px rgba(229,9,20,.28)
+      background:var(--memory-red);color:#fff;border:none;cursor:pointer;
+      min-width:120px;font-weight:700;
+      box-shadow:0 6px 16px rgba(229,9,20,.28);
+      transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
     }
-    button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 20px rgba(229,9,20,.36)}
+    button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(229,9,20,.36)}
     button:active{transform:translateY(0)}
     button:disabled{opacity:.6;cursor:not-allowed}
-    header .stack{display:flex;flex-direction:column}
-    header .stack small{opacity:.75;font-weight:500;margin-top:2px}
+
+    /* Cabeçalho de configuração inline, acima do chat, somente enquanto não iniciou */
+    .config{
+      display:grid;grid-template-columns:1fr 220px 140px;gap:10px;
+      padding:12px 18px;background:#fff;border-bottom:1px solid var(--gray-200);
+    }
+    .config.hidden{display:none}
+    .config label{display:none}
+    .system-badge{
+      display:inline-block;padding:4px 10px;background:var(--memory-red);
+      color:#fff;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px
+    }
+
+    /* Responsivo */
+    @media (max-width: 980px){
+      .app{grid-template-columns:1fr;grid-template-areas:"topbar" "chat";height:100dvh}
+      .right{display:none}
+      .config{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <img src="" alt="Memory"/>
+  <div class="app">
+    <div class="topbar">
+      <img id="logoMemory" src="assets/logo.png" alt="Memory" />
+      <div>
+        <div class="title">Chat Multi Sistema</div>
+        <div class="subtitle">Assistente para gestão pública</div>
       </div>
-      <div class="stack">
-        <h1>💬 Chatbot Multi Sistema</h1>
-        <small>Assistente inteligente para gestão pública</small>
-      </div>
-    </header>
-
-    <div id="configBox">
-      <div class="info">
-        <p><strong>👋 Bem-vindo!</strong></p>
-        <p>Configure sua sessão selecionando a entidade e o sistema que deseja consultar.</p>
-      </div>
-      <label>🏛️ Entidade</label>
-      <input type="text" id="entidade" value="Prefeitura A" placeholder="Digite o nome da entidade">
-      <label>🖥️ Sistema</label>
-      <select id="sistema">
-        <option value="SCF">🚗 Controle de Frotas (SCF)</option>
-        <option value="SPA">🏢 Patrimônio (SPA)</option>
-        <option value="STM">💰 Tributação Municipal (STM)</option>
-        <option value="SIP">👥 Folha de Pagamento (SIP)</option>
-        <option value="SCP">📊 Contabilidade Pública (SCP)</option>
-        <option value="SIC">📋 Compras e Licitações (SIC)</option>
-      </select>
-      <button onclick="iniciarSessao()">🚀 Iniciar Sessão</button>
     </div>
 
-    <div id="chatBox">
+    <aside class="right">
+      <header>Como funciona</header>
+      <div class="guide" id="guia">
+        <section>
+          <h4>1. Inicie a sessão</h4>
+          <p>Informe a entidade e selecione o sistema (Contabilidade, Folha, Compras, etc.).</p>
+        </section>
+        <section>
+          <h4>2. Faça perguntas objetivas</h4>
+          <ul>
+            <li>Use datas, códigos, placas ou CPF/CNPJ quando relevante.</li>
+            <li>Especifique o período e o tipo de relatório.</li>
+          </ul>
+        </section>
+        <section>
+          <h4>3. Exemplos úteis</h4>
+          <ul id="exemplosGuia"></ul>
+        </section>
+        <section>
+          <h4>4. Segurança</h4>
+          <p>Respostas exibem apenas dados autorizados para sua sessão.</p>
+        </section>
+      </div>
+    </aside>
+
+    <main class="chat">
+      <div class="config" id="configBox">
+        <input type="text" id="entidade" value="Prefeitura A" placeholder="Entidade" />
+        <select id="sistema">
+          <option value="SCF">Controle de Frotas (SCF)</option>
+          <option value="SPA">Patrimônio (SPA)</option>
+          <option value="STM">Tributação Municipal (STM)</option>
+          <option value="SIP">Folha de Pagamento (SIP)</option>
+          <option value="SCP">Contabilidade Pública (SCP)</option>
+          <option value="SIC">Compras e Licitações (SIC)</option>
+        </select>
+        <button onclick="iniciarSessao()">Iniciar sessão</button>
+      </div>
+
+      <div class="suggestions" id="sugestoes"></div>
+
       <div id="chat"></div>
+
       <div class="controls">
-        <input type="text" id="mensagem" placeholder="Digite sua pergunta...">
+        <input type="text" id="mensagem" placeholder="Digite sua pergunta..." />
         <button id="btnEnviar" onclick="enviarMensagem()">Enviar</button>
       </div>
-    </div>
+    </main>
   </div>
 
   <script>
     let entidadeData=null;
     let sessionId=null;
     const N8N_WEBHOOK="https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
+
     const SYSTEM_NAMES={
       'SCF':'Controle de Frotas',
       'SPA':'Patrimônio',
@@ -171,57 +238,103 @@
       'SCP':'Contabilidade Pública',
       'SIC':'Compras e Licitações'
     };
+
+    const PROMPTS=[
+      "Listar empenhos do mês atual por secretaria.",
+      "Resumo da folha de pagamento de janeiro a março.",
+      "Situação de cada veículo e última manutenção.",
+      "Itens de patrimônio sem depreciação registrada em 2024.",
+      "Processos de compra abertos acima de R$ 50.000.",
+      "Receita de IPTU por bairro no último trimestre.",
+      "Funcionários com adicional de insalubridade e valores.",
+      "Despesas por elemento no bimestre corrente.",
+      "Licitações com prazo para propostas nesta semana.",
+      "Veículos com IPVA ou seguro a vencer nos próximos 30 dias."
+    ];
+
+    function sorteio(array, n){
+      const pool=[...array];
+      const out=[];
+      while(out.length<n && pool.length){
+        const i=Math.floor(Math.random()*pool.length);
+        out.push(pool.splice(i,1)[0]);
+      }
+      return out;
+    }
+
+    function renderSugestoes(){
+      const container=document.getElementById("sugestoes");
+      const exemplosGuia=document.getElementById("exemplosGuia");
+      container.innerHTML="";
+      exemplosGuia.innerHTML="";
+      const picks=sorteio(PROMPTS,4);
+      picks.forEach(txt=>{
+        const chip=document.createElement("button");
+        chip.className="chip";
+        chip.textContent=txt;
+        chip.onclick=()=>{document.getElementById("mensagem").value=txt;document.getElementById("mensagem").focus();}
+        container.appendChild(chip);
+
+        const li=document.createElement("li");
+        li.textContent=txt;
+        exemplosGuia.appendChild(li);
+      });
+    }
+
     function iniciarSessao(){
       const entidadeInput=document.getElementById("entidade").value.trim();
       const sistemaInput=document.getElementById("sistema").value;
-      if(!entidadeInput){alert("⚠️ Por favor, preencha o nome da entidade");return;}
+      if(!entidadeInput){alert("Preencha o nome da entidade");return;}
       entidadeData={entidade:entidadeInput,sistema:sistemaInput};
       sessionId=entidadeData.entidade+"-"+entidadeData.sistema+"-"+Date.now();
-      const configBox=document.getElementById("configBox");
-      const chatBox=document.getElementById("chatBox");
-      configBox.classList.add("hidden");
-      chatBox.classList.add("active");
+      document.getElementById("configBox").classList.add("hidden");
+
       const sistemaName=SYSTEM_NAMES[sistemaInput];
       document.getElementById("chat").innerHTML=
-        '<div class="status">✅ Sessão iniciada<br><strong>'+entidadeData.entidade+
+        '<div class="status">Sessão iniciada — <strong>'+entidadeData.entidade+
         '</strong><span class="system-badge">'+sistemaName+'</span></div>';
       document.getElementById("mensagem").focus();
     }
+
     async function enviarMensagem(){
       const input=document.getElementById("mensagem");
       const msg=input.value.trim();
       if(!msg)return;
+
       adicionarMensagem(msg,'user');
       input.value="";
       desabilitarInput(true);
       const statusId=mostrarStatus();
+
       const payload={
-        entidade:entidadeData.entidade,
-        sistema:entidadeData.sistema,
+        entidade:entidadeData?.entidade||'',
+        sistema:entidadeData?.sistema||'',
         mensagem:msg,
-        sessionId:sessionId
+        sessionId:sessionId||('anon-'+Date.now())
       };
+
       try{
         const res=await fetch(N8N_WEBHOOK,{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify(payload)
         });
-        if(!res.ok)throw new Error("Erro HTTP: "+res.status);
+        if(!res.ok) throw new Error("Erro HTTP: "+res.status);
         const data=await res.json();
         removerStatus(statusId);
         if(data.error){
-          adicionarMensagem(data.text||"Erro desconhecido",'bot error');
+          adicionarMensagem(data.text||"Erro desconhecido",'bot');
         }else{
           adicionarMensagem(data.text||JSON.stringify(data),'bot');
         }
       }catch(error){
         removerStatus(statusId);
-        adicionarMensagem("❌ Erro ao conectar com o servidor: "+error.message,'bot error');
+        adicionarMensagem("Erro ao conectar com o servidor: "+error.message,'bot');
       }
       desabilitarInput(false);
       input.focus();
     }
+
     function adicionarMensagem(texto,tipo){
       const chat=document.getElementById("chat");
       const div=document.createElement("div");
@@ -229,36 +342,31 @@
       texto=texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
       div.innerHTML=texto;
       chat.appendChild(div);
-      scrollChat();
+      chat.scrollTop=chat.scrollHeight;
     }
+
     function mostrarStatus(){
       const chat=document.getElementById("chat");
-      const statusId="status-"+Date.now();
+      const id="status-"+Date.now();
       const div=document.createElement("div");
-      div.id=statusId;
-      div.className="status";
-      div.innerHTML='<div class="typing"><span></span><span></span><span></span></div> Processando...';
+      div.id=id; div.className="status";
+      div.innerHTML='<span class="typing"><span></span><span></span><span></span></span> Processando...';
       chat.appendChild(div);
-      scrollChat();
-      return statusId;
+      chat.scrollTop=chat.scrollHeight;
+      return id;
     }
-    function removerStatus(id){
-      const el=document.getElementById(id);
-      if(el)el.remove();
-    }
+    function removerStatus(id){const el=document.getElementById(id); if(el) el.remove();}
     function desabilitarInput(disabled){
       document.getElementById("mensagem").disabled=disabled;
       document.getElementById("btnEnviar").disabled=disabled;
     }
-    function scrollChat(){
-      const chat=document.getElementById("chat");
-      chat.scrollTop=chat.scrollHeight;
-    }
-    document.addEventListener('DOMContentLoaded',function(){
-      document.getElementById("mensagem").addEventListener("keydown",function(e){
-        if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviarMensagem();}
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      renderSugestoes();
+      document.getElementById("mensagem").addEventListener("keydown",e=>{
+        if(e.key==="Enter" && !e.shiftKey){e.preventDefault();enviarMensagem();}
       });
-      document.getElementById("entidade").addEventListener("keydown",function(e){
+      document.getElementById("entidade").addEventListener("keydown",e=>{
         if(e.key==="Enter"){e.preventDefault();iniciarSessao();}
       });
     });
