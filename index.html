@@ -145,9 +145,9 @@
     button:active{transform:translateY(0)}
     button:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Cabeçalho de configuração inline, acima do chat, somente enquanto não iniciou */
+    /* Cabeçalho de configuração inline - APENAS ENTIDADE */
     .config{
-      display:grid;grid-template-columns:1fr 220px 140px;gap:10px;
+      display:grid;grid-template-columns:1fr 140px;gap:10px;
       padding:12px 18px;background:#fff;border-bottom:1px solid var(--gray-200);
     }
     .config.hidden{display:none}
@@ -171,7 +171,7 @@
       <img id="logoMemory" src="assets/logo.png" alt="Memory" />
       <div>
         <div class="title">Chat Multi Sistema</div>
-        <div class="subtitle">Assistente para gestão pública</div>
+        <div class="subtitle">Detecção automática de módulos</div>
       </div>
     </div>
 
@@ -180,37 +180,34 @@
       <div class="guide" id="guia">
         <section>
           <h4>1. Inicie a sessão</h4>
-          <p>Informe a entidade e selecione o sistema (Contabilidade, Folha, Compras, etc.).</p>
+          <p>Informe apenas o nome da entidade. O sistema detectará automaticamente qual módulo usar baseado na sua pergunta.</p>
         </section>
         <section>
-          <h4>2. Faça perguntas objetivas</h4>
+          <h4>2. Faça perguntas naturais</h4>
           <ul>
-            <li>Use datas, códigos, placas ou CPF/CNPJ quando relevante.</li>
-            <li>Especifique o período e o tipo de relatório.</li>
+            <li>O sistema identifica se é sobre frotas, folha, contabilidade, compras, patrimônio ou tributos.</li>
+            <li>Use palavras-chave como: veículos, servidores, empenhos, contratos, bens, IPTU.</li>
           </ul>
         </section>
         <section>
-          <h4>3. Exemplos úteis</h4>
+          <h4>3. Exemplos por módulo</h4>
           <ul id="exemplosGuia"></ul>
         </section>
         <section>
-          <h4>4. Segurança</h4>
-          <p>Respostas exibem apenas dados autorizados para sua sessão.</p>
+          <h4>4. Sistemas detectados automaticamente</h4>
+          <p><strong>SCF:</strong> Frotas e veículos<br>
+          <strong>SIP:</strong> Folha de pagamento<br>
+          <strong>SCP:</strong> Contabilidade<br>
+          <strong>SIC:</strong> Compras e licitações<br>
+          <strong>SPA:</strong> Patrimônio<br>
+          <strong>STM:</strong> Tributação</p>
         </section>
       </div>
     </aside>
 
     <main class="chat">
       <div class="config" id="configBox">
-        <input type="text" id="entidade" value="Prefeitura A" placeholder="Entidade" />
-        <select id="sistema">
-          <option value="SCF">Controle de Frotas (SCF)</option>
-          <option value="SPA">Patrimônio (SPA)</option>
-          <option value="STM">Tributação Municipal (STM)</option>
-          <option value="SIP">Folha de Pagamento (SIP)</option>
-          <option value="SCP">Contabilidade Pública (SCP)</option>
-          <option value="SIC">Compras e Licitações (SIC)</option>
-        </select>
+        <input type="text" id="entidade" value="Prefeitura A" placeholder="Nome da entidade" />
         <button onclick="iniciarSessao()">Iniciar sessão</button>
       </div>
 
@@ -219,7 +216,7 @@
       <div id="chat"></div>
 
       <div class="controls">
-        <input type="text" id="mensagem" placeholder="Digite sua pergunta..." />
+        <input type="text" id="mensagem" placeholder="Ex: Quantos veículos temos? Valor da folha? Empenhos do mês..." />
         <button id="btnEnviar" onclick="enviarMensagem()">Enviar</button>
       </div>
     </main>
@@ -230,26 +227,17 @@
     let sessionId=null;
     const N8N_WEBHOOK="https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
 
-    const SYSTEM_NAMES={
-      'SCF':'Controle de Frotas',
-      'SPA':'Patrimônio',
-      'STM':'Tributação Municipal',
-      'SIP':'Folha de Pagamento',
-      'SCP':'Contabilidade Pública',
-      'SIC':'Compras e Licitações'
-    };
-
     const PROMPTS=[
+      "Quantos veículos temos cadastrados?",
+      "Qual o valor da folha de pagamento deste mês?",
       "Listar empenhos do mês atual por secretaria.",
-      "Resumo da folha de pagamento de janeiro a março.",
       "Situação de cada veículo e última manutenção.",
-      "Itens de patrimônio sem depreciação registrada em 2024.",
+      "Itens de patrimônio sem depreciação registrada.",
       "Processos de compra abertos acima de R$ 50.000.",
       "Receita de IPTU por bairro no último trimestre.",
-      "Funcionários com adicional de insalubridade e valores.",
+      "Funcionários com adicional de insalubridade.",
       "Despesas por elemento no bimestre corrente.",
-      "Licitações com prazo para propostas nesta semana.",
-      "Veículos com IPVA ou seguro a vencer nos próximos 30 dias."
+      "Contratos vencendo nos próximos 30 dias."
     ];
 
     function sorteio(array, n){
@@ -283,16 +271,15 @@
 
     function iniciarSessao(){
       const entidadeInput=document.getElementById("entidade").value.trim();
-      const sistemaInput=document.getElementById("sistema").value;
       if(!entidadeInput){alert("Preencha o nome da entidade");return;}
-      entidadeData={entidade:entidadeInput,sistema:sistemaInput};
-      sessionId=entidadeData.entidade+"-"+entidadeData.sistema+"-"+Date.now();
+      entidadeData={entidade:entidadeInput};
+      sessionId=entidadeData.entidade+"-"+Date.now();
       document.getElementById("configBox").classList.add("hidden");
 
-      const sistemaName=SYSTEM_NAMES[sistemaInput];
       document.getElementById("chat").innerHTML=
         '<div class="status">Sessão iniciada — <strong>'+entidadeData.entidade+
-        '</strong><span class="system-badge">'+sistemaName+'</span></div>';
+        '</strong></div>'+
+        '<div class="status">💡 Faça sua pergunta. O sistema detectará automaticamente o módulo!</div>';
       document.getElementById("mensagem").focus();
     }
 
@@ -307,8 +294,7 @@
       const statusId=mostrarStatus();
 
       const payload={
-        entidade:entidadeData?.entidade||'',
-        sistema:entidadeData?.sistema||'',
+        entidade:entidadeData?.entidade||'Prefeitura Teste',
         mensagem:msg,
         sessionId:sessionId||('anon-'+Date.now())
       };
@@ -350,7 +336,7 @@
       const id="status-"+Date.now();
       const div=document.createElement("div");
       div.id=id; div.className="status";
-      div.innerHTML='<span class="typing"><span></span><span></span><span></span></span> Processando...';
+      div.innerHTML='<span class="typing"><span></span><span></span><span></span></span> Analisando e processando...';
       chat.appendChild(div);
       chat.scrollTop=chat.scrollHeight;
       return id;
