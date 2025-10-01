@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Multi Sistema</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 700px;
+      height: 80vh;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #0078ff;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      font-size: 15px;
+    }
+    .message {
+      margin: 8px 0;
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    .user {
+      background: #0078ff;
+      color: #fff;
+      margin-left: auto;
+      border-bottom-right-radius: 3px;
+    }
+    .bot {
+      background: #e5e5ea;
+      color: #000;
+      margin-right: auto;
+      border-bottom-left-radius: 3px;
+    }
+    .status {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin: 5px 0;
+    }
+    .controls {
+      padding: 10px;
+      background: #fff;
+      display: flex;
+      gap: 8px;
+    }
+    input, select, button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    input[type="text"], select {
+      flex: 1;
+    }
+    button {
+      background: #0078ff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #005fcc;
+    }
+    #configBox {
+      padding: 15px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+    }
+    #chatBox {
+      display: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>💬 Chatbot Multi Sistema</header>
+
+    <div id="configBox">
+      <label>Entidade:</label><br>
+      <input type="text" id="entidade" value="Prefeitura A"><br><br>
+      <label>Sistema:</label><br>
+      <select id="sistema">
+        <option value="SCF">Controle de Frotas (SCF)</option>
+        <option value="SPA">Patrimônio (SPA)</option>
+        <option value="STM">Tributação Municipal (STM)</option>
+        <option value="SIP">Folha de Pagamento (SIP)</option>
+        <option value="SCP">Contabilidade Pública (SCP)</option>
+        <option value="SIC">Compras e Licitações (SIC)</option>
+      </select><br><br>
+      <button onclick="iniciar()">Iniciar Sessão</button>
+    </div>
+
+    <div id="chatBox">
+      <div id="chat"></div>
+      <div class="controls">
+        <input type="text" id="mensagem" placeholder="Digite sua pergunta...">
+        <button id="btnEnviar" onclick="enviarMensagem()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let entidadeData = null;
+    let sessionId = null;
+    const N8N_WEBHOOK = "https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
+
+    function iniciar() {
+      entidadeData = {
+        entidade: document.getElementById("entidade").value,
+        sistema: document.getElementById("sistema").value
+      };
+      sessionId = entidadeData.entidade + "-" + entidadeData.sistema + "-" + Date.now();
+      document.getElementById("configBox").style.display = "none";
+      document.getElementById("chatBox").style.display = "flex";
+      document.getElementById("chat").innerHTML = `<div class="status">Sessão iniciada: <b>${entidadeData.entidade}</b> - Sistema: <b>${entidadeData.sistema}</b></div>`;
+    }
+
+    async function enviarMensagem() {
+      const input = document.getElementById("mensagem");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      document.getElementById("chat").innerHTML += `<div class="message user">${msg}</div>`;
+      scrollChat();
+      input.value = "";
+      input.disabled = true;
+      document.getElementById("btnEnviar").disabled = true;
+
+      const statusId = "status-" + Date.now();
+      document.getElementById("chat").innerHTML += `<div id="${statusId}" class="status">Bot está digitando...</div>`;
+      scrollChat();
+
+      const payload = { ...entidadeData, mensagem: msg, sessionId: sessionId };
+
+      try {
+        const res = await fetch(N8N_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          credentials: "omit" // impede envio de cookies
+        });
+
+        if (!res.ok) throw new Error("Erro HTTP: " + res.status);
+
+        const data = await res.json();
+        document.getElementById(statusId).remove();
+        document.getElementById("chat").innerHTML += `<div class="message bot">${data.text || JSON.stringify(data)}</div>`;
+        scrollChat();
+      } catch (error) {
+        document.getElementById(statusId).remove();
+        document.getElementById("chat").innerHTML += `<div class="message bot">❌ Erro ao conectar: ${error.message}</div>`;
+      }
+
+      input.disabled = false;
+      document.getElementById("btnEnviar").disabled = false;
+      input.focus();
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && document.getElementById("mensagem") === document.activeElement) {
+        enviarMensagem();
+      }
+    });
+
+    function scrollChat() {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
