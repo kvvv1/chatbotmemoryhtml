@@ -2,126 +2,304 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Chatbot Multi Sistema</title>
+  <title>💬 Chatbot Multi Sistema</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #f2f2f2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
     }
+    
     .container {
-      width: 90%;
-      max-width: 700px;
-      height: 80vh;
+      width: 100%;
+      max-width: 800px;
+      height: 85vh;
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
+    
     header {
-      background: #0078ff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
-      padding: 15px;
+      padding: 20px;
       text-align: center;
-      font-size: 18px;
-      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+    
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
     #chat {
       flex: 1;
-      padding: 15px;
+      padding: 20px;
       overflow-y: auto;
-      background: #f9f9f9;
+      background: #f5f7fa;
       font-size: 15px;
     }
+    
+    #chat::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #chat::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    #chat::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    
     .message {
-      margin: 8px 0;
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 15px;
-      line-height: 1.4;
+      margin: 12px 0;
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.5;
       word-wrap: break-word;
       font-size: 14px;
+      animation: slideIn 0.3s ease;
     }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     .user {
-      background: #0078ff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
       margin-left: auto;
-      border-bottom-right-radius: 3px;
+      border-bottom-right-radius: 4px;
     }
+    
     .bot {
-      background: #e5e5ea;
-      color: #000;
+      background: #fff;
+      color: #333;
       margin-right: auto;
-      border-bottom-left-radius: 3px;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+    
+    .bot strong {
+      color: #667eea;
+    }
+    
     .status {
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       color: #888;
-      margin: 5px 0;
+      margin: 10px 0;
+      padding: 8px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 12px;
+      display: inline-block;
+      width: auto;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+      max-width: fit-content;
+      margin: 10px auto;
     }
+    
+    .typing {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+    
+    .typing span {
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+    
     .controls {
-      padding: 10px;
+      padding: 20px;
       background: #fff;
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      border-top: 1px solid #e0e0e0;
     }
+    
     input, select, button {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
       font-size: 14px;
+      font-family: inherit;
     }
-    input[type="text"], select {
+    
+    input[type="text"] {
       flex: 1;
+      outline: none;
+      transition: all 0.3s;
     }
+    
+    input[type="text"]:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    select {
+      background: #fff;
+      cursor: pointer;
+      outline: none;
+    }
+    
     button {
-      background: #0078ff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
       border: none;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s;
+      font-weight: 600;
+      min-width: 100px;
     }
-    button:hover {
-      background: #005fcc;
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
     #configBox {
-      padding: 15px;
-      background: #f5f5f5;
-      border-bottom: 1px solid #ddd;
+      padding: 30px;
+      background: #fff;
     }
+    
+    #configBox label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    #configBox input,
+    #configBox select {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    
+    #configBox .info {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+    
+    #configBox .info p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+    
     #chatBox {
       display: none;
       flex: 1;
       display: flex;
       flex-direction: column;
     }
+    
+    .system-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #667eea;
+      color: white;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .error {
+      background: #fee;
+      color: #c33;
+      border-left: 4px solid #c33;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>💬 Chatbot Multi Sistema</header>
+    <header>
+      <h1>💬 Chatbot Multi Sistema</h1>
+      <p>Assistente inteligente para gestão pública</p>
+    </header>
 
     <div id="configBox">
-      <label>Entidade:</label><br>
-      <input type="text" id="entidade" value="Prefeitura A"><br><br>
-      <label>Sistema:</label><br>
+      <div class="info">
+        <p><strong>👋 Bem-vindo!</strong></p>
+        <p>Configure sua sessão selecionando a entidade e o sistema que deseja consultar.</p>
+      </div>
+      
+      <label>🏛️ Entidade</label>
+      <input type="text" id="entidade" value="Prefeitura A" placeholder="Digite o nome da entidade">
+      
+      <label>🖥️ Sistema</label>
       <select id="sistema">
-        <option value="SCF">Controle de Frotas (SCF)</option>
-        <option value="SPA">Patrimônio (SPA)</option>
-        <option value="STM">Tributação Municipal (STM)</option>
-        <option value="SIP">Folha de Pagamento (SIP)</option>
-        <option value="SCP">Contabilidade Pública (SCP)</option>
-        <option value="SIC">Compras e Licitações (SIC)</option>
-      </select><br><br>
-      <button onclick="iniciar()">Iniciar Sessão</button>
+        <option value="SCF">🚗 Controle de Frotas (SCF)</option>
+        <option value="SPA">🏢 Patrimônio (SPA)</option>
+        <option value="STM">💰 Tributação Municipal (STM)</option>
+        <option value="SIP">👥 Folha de Pagamento (SIP)</option>
+        <option value="SCP">📊 Contabilidade Pública (SCP)</option>
+        <option value="SIC">📋 Compras e Licitações (SIC)</option>
+      </select>
+      
+      <button onclick="iniciarSessao()">🚀 Iniciar Sessão</button>
     </div>
 
     <div id="chatBox">
@@ -138,68 +316,104 @@
     let sessionId = null;
     const N8N_WEBHOOK = "https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
 
-    function iniciar() {
+    const SYSTEM_NAMES = {
+      'SCF': 'Controle de Frotas',
+      'SPA': 'Patrimônio',
+      'STM': 'Tributação Municipal',
+      'SIP': 'Folha de Pagamento',
+      'SCP': 'Contabilidade Pública',
+      'SIC': 'Compras e Licitações'
+    };
+
+    function iniciarSessao() {
+      const entidadeInput = document.getElementById("entidade").value.trim();
+      const sistemaInput = document.getElementById("sistema").value;
+      
+      if (!entidadeInput) {
+        alert("⚠️ Por favor, preencha o nome da entidade");
+        return;
+      }
+      
       entidadeData = {
-        entidade: document.getElementById("entidade").value,
-        sistema: document.getElementById("sistema").value
+        entidade: entidadeInput,
+        sistema: sistemaInput
       };
-      sessionId = entidadeData.entidade + "-" + entidadeData.sistema + "-" + Date.now();
+      
+      sessionId = `${entidadeData.entidade}-${entidadeData.sistema}-${Date.now()}`;
+      
       document.getElementById("configBox").style.display = "none";
       document.getElementById("chatBox").style.display = "flex";
-      document.getElementById("chat").innerHTML = `<div class="status">Sessão iniciada: <b>${entidadeData.entidade}</b> - Sistema: <b>${entidadeData.sistema}</b></div>`;
+      
+      const sistemaName = SYSTEM_NAMES[sistemaInput];
+      document.getElementById("chat").innerHTML = `
+        <div class="status">
+          ✅ Sessão iniciada<br>
+          <strong>${entidadeData.entidade}</strong>
+          <span class="system-badge">${sistemaName}</span>
+        </div>
+      `;
+      
+      document.getElementById("mensagem").focus();
     }
 
     async function enviarMensagem() {
       const input = document.getElementById("mensagem");
       const msg = input.value.trim();
+      
       if (!msg) return;
 
-      document.getElementById("chat").innerHTML += `<div class="message user">${msg}</div>`;
-      scrollChat();
+      adicionarMensagem(msg, 'user');
       input.value = "";
-      input.disabled = true;
-      document.getElementById("btnEnviar").disabled = true;
+      desabilitarInput(true);
 
-      const statusId = "status-" + Date.now();
-      document.getElementById("chat").innerHTML += `<div id="${statusId}" class="status">Bot está digitando...</div>`;
-      scrollChat();
+      const statusId = mostrarStatus();
 
-      const payload = { ...entidadeData, mensagem: msg, sessionId: sessionId };
+      const payload = {
+        ...entidadeData,
+        mensagem: msg,
+        sessionId: sessionId
+      };
 
       try {
         const res = await fetch(N8N_WEBHOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          credentials: "omit" // impede envio de cookies
+          body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Erro HTTP: " + res.status);
+        if (!res.ok) {
+          throw new Error(`Erro HTTP: ${res.status}`);
+        }
 
         const data = await res.json();
-        document.getElementById(statusId).remove();
-        document.getElementById("chat").innerHTML += `<div class="message bot">${data.text || JSON.stringify(data)}</div>`;
-        scrollChat();
+        
+        removerStatus(statusId);
+        
+        if (data.error) {
+          adicionarMensagem(data.text || "Erro desconhecido", 'bot error');
+        } else {
+          adicionarMensagem(data.text || JSON.stringify(data), 'bot');
+        }
+        
       } catch (error) {
-        document.getElementById(statusId).remove();
-        document.getElementById("chat").innerHTML += `<div class="message bot">❌ Erro ao conectar: ${error.message}</div>`;
+        removerStatus(statusId);
+        adicionarMensagem(`❌ Erro ao conectar com o servidor: ${error.message}`, 'bot error');
       }
 
-      input.disabled = false;
-      document.getElementById("btnEnviar").disabled = false;
+      desabilitarInput(false);
       input.focus();
     }
 
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Enter" && document.getElementById("mensagem") === document.activeElement) {
-        enviarMensagem();
-      }
-    });
-
-    function scrollChat() {
+    function adicionarMensagem(texto, tipo) {
       const chat = document.getElementById("chat");
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
-</body>
-</html>
+      const div = document.createElement("div");
+      div.className = `message ${tipo}`;
+      
+      // Processa markdown básico
+      texto = texto
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      
+      div.innerHTML = texto;
+      chat.appendChild(div);
+      scrollChat();
