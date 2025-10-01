@@ -251,8 +251,11 @@
     #chatBox {
       display: none;
       flex: 1;
-      display: flex;
       flex-direction: column;
+    }
+    
+    #chatBox.active {
+      display: flex;
     }
     
     .system-badge {
@@ -341,8 +344,11 @@
       
       sessionId = `${entidadeData.entidade}-${entidadeData.sistema}-${Date.now()}`;
       
+      // Esconde configuração e mostra chat
       document.getElementById("configBox").style.display = "none";
-      document.getElementById("chatBox").style.display = "flex";
+      const chatBox = document.getElementById("chatBox");
+      chatBox.style.display = "flex";
+      chatBox.classList.add("active");
       
       const sistemaName = SYSTEM_NAMES[sistemaInput];
       document.getElementById("chat").innerHTML = `
@@ -416,4 +422,4 @@
       
       div.innerHTML = texto;
       chat.appendChild(div);
-      scrollChat();
+      scrollChat(); }
