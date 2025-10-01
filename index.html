@@ -2,285 +2,133 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>💬 Chatbot Multi Sistema</title>
+  <title>💬 Chatbot Multi Sistema — Memory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root{
+      --memory-red:#E50914;
+      --memory-red-700:#b0060f;
+      --gray-900:#2B2E34;
+      --gray-800:#363A40;
+      --gray-700:#4B4F56;
+      --gray-400:#C9CCD1;
+      --gray-200:#E9EBEF;
+      --gray-100:#F5F6F7;
+      --white:#FFFFFF;
+      --radius-lg:20px;
+      --radius-md:12px;
+      --shadow-lg:0 20px 60px rgba(0,0,0,.18);
+      --shadow-sm:0 2px 10px rgba(0,0,0,.08);
     }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      background:radial-gradient(1200px 700px at 20% -10%,#ffffff 0%,#f2f3f5 40%,#e9ebef 100%);
+      display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;color:var(--gray-700);
     }
-    
-    .container {
-      width: 100%;
-      max-width: 800px;
-      height: 85vh;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+    .container{
+      width:100%;max-width:880px;height:85vh;background:var(--white);
+      border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);
+      overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--gray-200);
     }
-    
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    header{
+      background:var(--gray-900);
+      color:var(--white);
+      padding:18px 22px;
+      display:flex;align-items:center;gap:14px;
+      box-shadow:var(--shadow-sm);
     }
-    
-    header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 5px;
+    header .brand{display:flex;align-items:center;gap:10px}
+    header .brand img{height:28px;width:auto;display:block}
+    header h1{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:.2px}
+    header p{font-size:12px;opacity:.85}
+    #chatBox{display:none;flex-direction:column;flex:1;background:var(--gray-100)}
+    #chatBox.active{display:flex}
+    #chat{
+      flex:1;padding:22px;overflow-y:auto;background:var(--gray-100);font-size:15px;
+      scroll-behavior:smooth;
+      scrollbar-width:thin;scrollbar-color:var(--memory-red) transparent;
     }
-    
-    header p {
-      font-size: 14px;
-      opacity: 0.9;
+    #chat::-webkit-scrollbar{width:10px}
+    #chat::-webkit-scrollbar-track{background:transparent}
+    #chat::-webkit-scrollbar-thumb{
+      background:var(--memory-red);
+      border-radius:10px;border:2px solid var(--gray-100);
     }
-    
-    #chat {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: #f5f7fa;
-      font-size: 15px;
+    #chat::-webkit-scrollbar-thumb:hover{background:var(--memory-red-700)}
+    .message{
+      margin:12px 0;max-width:75%;padding:12px 16px;border-radius:16px;
+      line-height:1.55;word-wrap:break-word;font-size:14px;animation:slideIn .25s ease;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);
     }
-    
-    #chat::-webkit-scrollbar {
-      width: 8px;
+    @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .user{
+      margin-left:auto;background:var(--memory-red);color:var(--white);
+      border-bottom-right-radius:6px;
     }
-    
-    #chat::-webkit-scrollbar-track {
-      background: #f1f1f1;
+    .bot{
+      margin-right:auto;background:var(--white);color:var(--gray-800);
+      border:1px solid var(--gray-200);border-bottom-left-radius:6px;
     }
-    
-    #chat::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
+    .bot strong{color:var(--gray-900)}
+    .status{
+      text-align:center;font-size:12.5px;color:var(--gray-700);
+      margin:10px auto;padding:8px 12px;background:#fff;border-radius:999px;
+      display:block;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--gray-200)
     }
-    
-    .message {
-      margin: 12px 0;
-      max-width: 75%;
-      padding: 12px 16px;
-      border-radius: 18px;
-      line-height: 1.5;
-      word-wrap: break-word;
-      font-size: 14px;
-      animation: slideIn 0.3s ease;
+    .typing{display:inline-flex;gap:4px;align-items:center;margin-right:6px}
+    .typing span{
+      width:7px;height:7px;background:var(--memory-red);border-radius:50%;
+      animation:typing 1.4s infinite
     }
-    
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .typing span:nth-child(2){animation-delay:.2s}
+    .typing span:nth-child(3){animation-delay:.4s}
+    @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+    .system-badge{
+      display:inline-block;padding:4px 10px;background:var(--memory-red);
+      color:var(--white);border-radius:999px;font-size:11px;font-weight:700;margin-left:8px
     }
-    
-    .user {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
+    .error{background:#fff3f3;color:#9f1f1f;border-left:4px solid #c33}
+    #configBox{padding:26px 26px 28px;background:var(--white);display:block}
+    #configBox.hidden{display:none}
+    #configBox .info{
+      background:var(--gray-100);padding:14px;border-radius:12px;margin-bottom:18px;
+      border:1px solid var(--gray-200)
     }
-    
-    .bot {
-      background: #fff;
-      color: #333;
-      margin-right: auto;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    #configBox label{display:block;margin-bottom:8px;font-weight:700;color:var(--gray-800);font-size:13px}
+    #configBox input,#configBox select{width:100%;margin-bottom:18px}
+    .controls{
+      padding:16px 18px;background:var(--white);display:flex;gap:10px;border-top:1px solid var(--gray-200)
     }
-    
-    .bot strong {
-      color: #667eea;
+    input,select,button{
+      padding:12px 14px;border-radius:12px;border:1px solid var(--gray-200);
+      font-size:14px;font-family:inherit;background:var(--white)
     }
-    
-    .status {
-      text-align: center;
-      font-size: 13px;
-      color: #888;
-      margin: 10px auto;
-      padding: 8px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 12px;
-      display: block;
-      max-width: fit-content;
+    input[type="text"]{flex:1;outline:none;transition:all .2s}
+    input[type="text"]:focus{border-color:var(--memory-red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
+    select{cursor:pointer;outline:none}
+    button{
+      background:var(--memory-red);color:var(--white);border:none;cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      font-weight:700;min-width:110px;box-shadow:0 6px 16px rgba(229,9,20,.28)
     }
-    
-    .typing {
-      display: inline-flex;
-      gap: 4px;
-      align-items: center;
-    }
-    
-    .typing span {
-      width: 8px;
-      height: 8px;
-      background: #667eea;
-      border-radius: 50%;
-      animation: typing 1.4s infinite;
-    }
-    
-    .typing span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .typing span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    
-    @keyframes typing {
-      0%, 60%, 100% {
-        transform: translateY(0);
-      }
-      30% {
-        transform: translateY(-10px);
-      }
-    }
-    
-    .controls {
-      padding: 20px;
-      background: #fff;
-      display: flex;
-      gap: 10px;
-      border-top: 1px solid #e0e0e0;
-    }
-    
-    input, select, button {
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    
-    input[type="text"] {
-      flex: 1;
-      outline: none;
-      transition: all 0.3s;
-    }
-    
-    input[type="text"]:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    select {
-      background: #fff;
-      cursor: pointer;
-      outline: none;
-    }
-    
-    button {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-weight: 600;
-      min-width: 100px;
-    }
-    
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    #configBox {
-      padding: 30px;
-      background: #fff;
-      display: block;
-    }
-    
-    #configBox.hidden {
-      display: none;
-    }
-    
-    #configBox label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-      font-size: 14px;
-    }
-    
-    #configBox input,
-    #configBox select {
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    
-    #configBox .info {
-      background: #f0f4ff;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border-left: 4px solid #667eea;
-    }
-    
-    #configBox .info p {
-      font-size: 13px;
-      color: #555;
-      line-height: 1.6;
-    }
-    
-    #chatBox {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-    }
-    
-    #chatBox.active {
-      display: flex;
-    }
-    
-    .system-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #667eea;
-      color: white;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-    
-    .error {
-      background: #fee;
-      color: #c33;
-      border-left: 4px solid #c33;
-    }
+    button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 20px rgba(229,9,20,.36)}
+    button:active{transform:translateY(0)}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    header .stack{display:flex;flex-direction:column}
+    header .stack small{opacity:.75;font-weight:500;margin-top:2px}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>💬 Chatbot Multi Sistema</h1>
-      <p>Assistente inteligente para gestão pública</p>
+      <div class="brand">
+        <img src="" alt="Memory"/>
+      </div>
+      <div class="stack">
+        <h1>💬 Chatbot Multi Sistema</h1>
+        <small>Assistente inteligente para gestão pública</small>
+      </div>
     </header>
 
     <div id="configBox">
@@ -288,10 +136,8 @@
         <p><strong>👋 Bem-vindo!</strong></p>
         <p>Configure sua sessão selecionando a entidade e o sistema que deseja consultar.</p>
       </div>
-      
       <label>🏛️ Entidade</label>
       <input type="text" id="entidade" value="Prefeitura A" placeholder="Digite o nome da entidade">
-      
       <label>🖥️ Sistema</label>
       <select id="sistema">
         <option value="SCF">🚗 Controle de Frotas (SCF)</option>
@@ -301,7 +147,6 @@
         <option value="SCP">📊 Contabilidade Pública (SCP)</option>
         <option value="SIC">📋 Compras e Licitações (SIC)</option>
       </select>
-      
       <button onclick="iniciarSessao()">🚀 Iniciar Sessão</button>
     </div>
 
@@ -315,179 +160,106 @@
   </div>
 
   <script>
-    let entidadeData = null;
-    let sessionId = null;
-    const N8N_WEBHOOK = "https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
-
-    const SYSTEM_NAMES = {
-      'SCF': 'Controle de Frotas',
-      'SPA': 'Patrimônio',
-      'STM': 'Tributação Municipal',
-      'SIP': 'Folha de Pagamento',
-      'SCP': 'Contabilidade Pública',
-      'SIC': 'Compras e Licitações'
+    let entidadeData=null;
+    let sessionId=null;
+    const N8N_WEBHOOK="https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
+    const SYSTEM_NAMES={
+      'SCF':'Controle de Frotas',
+      'SPA':'Patrimônio',
+      'STM':'Tributação Municipal',
+      'SIP':'Folha de Pagamento',
+      'SCP':'Contabilidade Pública',
+      'SIC':'Compras e Licitações'
     };
-
-    function iniciarSessao() {
-      console.log('Iniciando sessão...');
-      
-      const entidadeInput = document.getElementById("entidade").value.trim();
-      const sistemaInput = document.getElementById("sistema").value;
-      
-      console.log('Entidade:', entidadeInput);
-      console.log('Sistema:', sistemaInput);
-      
-      if (!entidadeInput) {
-        alert("⚠️ Por favor, preencha o nome da entidade");
-        return;
-      }
-      
-      entidadeData = {
-        entidade: entidadeInput,
-        sistema: sistemaInput
-      };
-      
-      sessionId = entidadeData.entidade + "-" + entidadeData.sistema + "-" + Date.now();
-      
-      console.log('SessionId:', sessionId);
-      
-      // Esconde config e mostra chat
-      const configBox = document.getElementById("configBox");
-      const chatBox = document.getElementById("chatBox");
-      
+    function iniciarSessao(){
+      const entidadeInput=document.getElementById("entidade").value.trim();
+      const sistemaInput=document.getElementById("sistema").value;
+      if(!entidadeInput){alert("⚠️ Por favor, preencha o nome da entidade");return;}
+      entidadeData={entidade:entidadeInput,sistema:sistemaInput};
+      sessionId=entidadeData.entidade+"-"+entidadeData.sistema+"-"+Date.now();
+      const configBox=document.getElementById("configBox");
+      const chatBox=document.getElementById("chatBox");
       configBox.classList.add("hidden");
       chatBox.classList.add("active");
-      
-      console.log('Boxes trocados');
-      
-      const sistemaName = SYSTEM_NAMES[sistemaInput];
-      document.getElementById("chat").innerHTML = 
-        '<div class="status">' +
-        '✅ Sessão iniciada<br>' +
-        '<strong>' + entidadeData.entidade + '</strong>' +
-        '<span class="system-badge">' + sistemaName + '</span>' +
-        '</div>';
-      
+      const sistemaName=SYSTEM_NAMES[sistemaInput];
+      document.getElementById("chat").innerHTML=
+        '<div class="status">✅ Sessão iniciada<br><strong>'+entidadeData.entidade+
+        '</strong><span class="system-badge">'+sistemaName+'</span></div>';
       document.getElementById("mensagem").focus();
-      
-      console.log('Sessão iniciada com sucesso');
     }
-
-    async function enviarMensagem() {
-      const input = document.getElementById("mensagem");
-      const msg = input.value.trim();
-      
-      if (!msg) return;
-
-      adicionarMensagem(msg, 'user');
-      input.value = "";
+    async function enviarMensagem(){
+      const input=document.getElementById("mensagem");
+      const msg=input.value.trim();
+      if(!msg)return;
+      adicionarMensagem(msg,'user');
+      input.value="";
       desabilitarInput(true);
-
-      const statusId = mostrarStatus();
-
-      const payload = {
-        entidade: entidadeData.entidade,
-        sistema: entidadeData.sistema,
-        mensagem: msg,
-        sessionId: sessionId
+      const statusId=mostrarStatus();
+      const payload={
+        entidade:entidadeData.entidade,
+        sistema:entidadeData.sistema,
+        mensagem:msg,
+        sessionId:sessionId
       };
-
-      try {
-        const res = await fetch(N8N_WEBHOOK, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+      try{
+        const res=await fetch(N8N_WEBHOOK,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(payload)
         });
-
-        if (!res.ok) {
-          throw new Error("Erro HTTP: " + res.status);
-        }
-
-        const data = await res.json();
-        
+        if(!res.ok)throw new Error("Erro HTTP: "+res.status);
+        const data=await res.json();
         removerStatus(statusId);
-        
-        if (data.error) {
-          adicionarMensagem(data.text || "Erro desconhecido", 'bot error');
-        } else {
-          adicionarMensagem(data.text || JSON.stringify(data), 'bot');
+        if(data.error){
+          adicionarMensagem(data.text||"Erro desconhecido",'bot error');
+        }else{
+          adicionarMensagem(data.text||JSON.stringify(data),'bot');
         }
-        
-      } catch (error) {
+      }catch(error){
         removerStatus(statusId);
-        adicionarMensagem("❌ Erro ao conectar com o servidor: " + error.message, 'bot error');
+        adicionarMensagem("❌ Erro ao conectar com o servidor: "+error.message,'bot error');
       }
-
       desabilitarInput(false);
       input.focus();
     }
-
-    function adicionarMensagem(texto, tipo) {
-      const chat = document.getElementById("chat");
-      const div = document.createElement("div");
-      div.className = "message " + tipo;
-      
-      // Processa markdown básico
-      texto = texto
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-      
-      div.innerHTML = texto;
+    function adicionarMensagem(texto,tipo){
+      const chat=document.getElementById("chat");
+      const div=document.createElement("div");
+      div.className="message "+tipo;
+      texto=texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+      div.innerHTML=texto;
       chat.appendChild(div);
       scrollChat();
     }
-
-    function mostrarStatus() {
-      const chat = document.getElementById("chat");
-      const statusId = "status-" + Date.now();
-      const div = document.createElement("div");
-      div.id = statusId;
-      div.className = "status";
-      div.innerHTML = 
-        '<div class="typing">' +
-        '<span></span>' +
-        '<span></span>' +
-        '<span></span>' +
-        '</div>' +
-        ' Processando...';
+    function mostrarStatus(){
+      const chat=document.getElementById("chat");
+      const statusId="status-"+Date.now();
+      const div=document.createElement("div");
+      div.id=statusId;
+      div.className="status";
+      div.innerHTML='<div class="typing"><span></span><span></span><span></span></div> Processando...';
       chat.appendChild(div);
       scrollChat();
       return statusId;
     }
-
-    function removerStatus(statusId) {
-      const status = document.getElementById(statusId);
-      if (status) {
-        status.remove();
-      }
+    function removerStatus(id){
+      const el=document.getElementById(id);
+      if(el)el.remove();
     }
-
-    function desabilitarInput(disabled) {
-      document.getElementById("mensagem").disabled = disabled;
-      document.getElementById("btnEnviar").disabled = disabled;
+    function desabilitarInput(disabled){
+      document.getElementById("mensagem").disabled=disabled;
+      document.getElementById("btnEnviar").disabled=disabled;
     }
-
-    function scrollChat() {
-      const chat = document.getElementById("chat");
-      chat.scrollTop = chat.scrollHeight;
+    function scrollChat(){
+      const chat=document.getElementById("chat");
+      chat.scrollTop=chat.scrollHeight;
     }
-
-    // Event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM carregado');
-      
-      document.getElementById("mensagem").addEventListener("keydown", function(e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          enviarMensagem();
-        }
+    document.addEventListener('DOMContentLoaded',function(){
+      document.getElementById("mensagem").addEventListener("keydown",function(e){
+        if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviarMensagem();}
       });
-
-      document.getElementById("entidade").addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          iniciarSessao();
-        }
+      document.getElementById("entidade").addEventListener("keydown",function(e){
+        if(e.key==="Enter"){e.preventDefault();iniciarSessao();}
       });
     });
   </script>
