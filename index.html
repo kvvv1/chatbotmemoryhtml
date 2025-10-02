@@ -22,7 +22,7 @@
       font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       background:radial-gradient(1200px 700px at 20% -10%,#ffffff 0%,#f2f3f5 40%,#e9ebef 100%);
       color:var(--gray-600);
-      overflow:hidden; /* página fica fixa; só o conteúdo interno rola */
+      overflow:hidden;
     }
 
     .app{
@@ -65,7 +65,7 @@
 
     .chat{
       grid-area:chat;display:flex;flex-direction:column;background:var(--gray-100);height:100%;
-      overflow:hidden; /* impede rolagem do container; só #chat rola */
+      overflow:hidden;
     }
 
     #chat{
@@ -97,7 +97,6 @@
     .typing span:nth-child(3){animation-delay:.4s}
     @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
 
-    /* SUGESTÕES logo acima da barra de perguntas (fixas no layout) */
     .suggestions{
       padding:12px 18px;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);
       display:flex;flex-wrap:wrap;gap:10px;background:#fff;
@@ -116,13 +115,16 @@
       padding:12px 14px;border-radius:12px;border:1px solid var(--gray-200);
       font-size:14px;font-family:inherit;background:#fff
     }
-    input[type="text"]{flex:1;outline:none;transition:all .2s}
-    input[type="text"]:focus{border-color:var(--memory-red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
+    /* REMOVE glow vermelho no foco */
+    input[type="text"]{flex:1;outline:none;transition:border-color .2s}
+    input[type="text"]:focus{border-color:var(--memory-red);box-shadow:none}
+
+    /* REMOVE sombras vermelhas do botão; hover neutro suave */
     button{
       background:var(--memory-red);color:#fff;border:none;cursor:pointer;min-width:120px;font-weight:700;
-      box-shadow:0 6px 16px rgba(229,9,20,.28);transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      box-shadow:none;transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
     }
-    button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(229,9,20,.36)}
+    button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
     button:active{transform:translateY(0)}
     button:disabled{opacity:.6;cursor:not-allowed}
 
@@ -169,10 +171,7 @@
 
     <main class="chat">
       <div id="chat"></div>
-
-      <!-- SUGESTÕES acima da barra de perguntas -->
       <div class="suggestions" id="sugestoes"></div>
-
       <div class="controls">
         <input type="text" id="mensagem" placeholder="Ex.: Empenhos do mês, valor da folha, veículos com manutenção pendente..." />
         <button id="btnEnviar" onclick="enviarMensagem()">Enviar</button>
@@ -236,7 +235,7 @@
       texto = texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
       div.innerHTML = texto;
       chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight; // rola apenas o conteúdo do chat
+      chat.scrollTop = chat.scrollHeight;
     }
 
     function mostrarStatus(){
@@ -271,8 +270,8 @@
       const statusId=mostrarStatus();
 
       const payload={
-        entidade: "GLOBAL",   // compatibilidade c/ backend sem expor no UI
-        sistema:  "AUTO",     // detecção automática do módulo
+        entidade: "GLOBAL",
+        sistema:  "AUTO",
         mensagem: msg,
         sessionId: sessionId || ('memory-' + Date.now())
       };
