@@ -14,7 +14,6 @@
       --gray-600:#4B4F56;
       --gray-800:#2F3238;
       --white:#ffffff;
-      --radius:14px;
     }
 
     *{margin:0;padding:0;box-sizing:border-box}
@@ -23,21 +22,19 @@
       font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       background:radial-gradient(1200px 700px at 20% -10%,#ffffff 0%,#f2f3f5 40%,#e9ebef 100%);
       color:var(--gray-600);
+      overflow:hidden; /* página fica fixa; só o conteúdo interno rola */
     }
 
-    /* Layout de página inteira (estilo ChatGPT) */
     .app{
       display:grid;
-      grid-template-columns: 1fr 360px; /* chat | guia */
+      grid-template-columns: 1fr 360px;
       grid-template-rows: 64px 1fr;
       grid-template-areas:
         "topbar right"
         "chat   right";
       height:100vh;
-      gap:0;
     }
 
-    /* Topbar */
     .topbar{
       grid-area:topbar;
       display:flex;align-items:center;gap:12px;
@@ -46,59 +43,35 @@
       color:var(--white);
       border-bottom:1px solid rgba(255,255,255,.06);
     }
-    #logoMemory{
-      height:28px;width:auto;display:block;
-    }
-    .title{
-      font-weight:700;letter-spacing:.2px;font-size:16px;line-height:1;
-    }
+    #logoMemory{height:28px;width:auto;display:block}
+    .title{font-weight:700;letter-spacing:.2px;font-size:16px;line-height:1}
     .subtitle{font-size:12px;opacity:.8}
 
-    /* Lateral direita (guia) */
     .right{
-      grid-area:right;
-      display:flex;flex-direction:column;
-      border-left:1px solid var(--gray-200);
-      background:var(--white);
-      height:100%;
+      grid-area:right;display:flex;flex-direction:column;
+      border-left:1px solid var(--gray-200);background:var(--white)
     }
-    .right header{
-      padding:16px 18px;border-bottom:1px solid var(--gray-200);
-      font-weight:700;color:#1d1f24;
-    }
+    .right header{padding:16px 18px;border-bottom:1px solid var(--gray-200);font-weight:700;color:#1d1f24}
     .guide{
-      padding:16px 18px;overflow:auto;
+      padding:16px 18px;overflow:auto;height:100%;
       scrollbar-width:thin;scrollbar-color:var(--memory-red) transparent;
     }
     .guide::-webkit-scrollbar{width:10px}
     .guide::-webkit-scrollbar-thumb{background:var(--memory-red);border-radius:10px;border:2px solid transparent}
     .guide section{margin-bottom:18px}
     .guide h4{font-size:13px;color:#1d1f24;margin-bottom:8px}
-    .guide p, .guide li{font-size:13px;line-height:1.55}
+    .guide p,.guide li{font-size:13px;line-height:1.55}
     .guide ul{padding-left:18px}
 
-    /* Área do chat */
     .chat{
-      grid-area:chat;
-      display:flex;flex-direction:column;height:100%;
-      background:var(--gray-100);
+      grid-area:chat;display:flex;flex-direction:column;background:var(--gray-100);height:100%;
+      overflow:hidden; /* impede rolagem do container; só #chat rola */
     }
-
-    .suggestions{
-      padding:14px 18px;border-bottom:1px solid var(--gray-200);
-      display:flex;flex-wrap:wrap;gap:10px;background:#fff;
-    }
-    .chip{
-      border:1px solid var(--gray-300);
-      background:#fff;color:#1d1f24;
-      padding:8px 12px;border-radius:999px;font-size:12.5px;
-      cursor:pointer;transition:all .15s ease;
-    }
-    .chip:hover{border-color:var(--memory-red);color:var(--memory-red)}
 
     #chat{
       flex:1;overflow:auto;padding:20px;
       scrollbar-width:thin;scrollbar-color:var(--memory-red) transparent;
+      background:var(--gray-100);
     }
     #chat::-webkit-scrollbar{width:10px}
     #chat::-webkit-scrollbar-thumb{background:var(--memory-red);border-radius:10px;border:2px solid var(--gray-100)}
@@ -110,7 +83,6 @@
       animation:slide .22s ease;
     }
     @keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
     .user{margin-left:auto;background:var(--memory-red);color:#fff;border-bottom-right-radius:6px}
     .bot{margin-right:auto;background:#fff;color:#1d1f24;border:1px solid var(--gray-200);border-bottom-left-radius:6px}
     .bot strong{color:#111}
@@ -125,43 +97,38 @@
     .typing span:nth-child(3){animation-delay:.4s}
     @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
 
+    /* SUGESTÕES logo acima da barra de perguntas (fixas no layout) */
+    .suggestions{
+      padding:12px 18px;border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);
+      display:flex;flex-wrap:wrap;gap:10px;background:#fff;
+    }
+    .chip{
+      border:1px solid var(--gray-300);background:#fff;color:#1d1f24;
+      padding:8px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;transition:all .15s ease;
+    }
+    .chip:hover{border-color:var(--memory-red);color:var(--memory-red)}
+
     .controls{
       padding:14px 18px;background:#fff;border-top:1px solid var(--gray-200);
       display:flex;gap:10px;
     }
-    input,select,button{
+    input,button{
       padding:12px 14px;border-radius:12px;border:1px solid var(--gray-200);
       font-size:14px;font-family:inherit;background:#fff
     }
     input[type="text"]{flex:1;outline:none;transition:all .2s}
     input[type="text"]:focus{border-color:var(--memory-red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
     button{
-      background:var(--memory-red);color:#fff;border:none;cursor:pointer;
-      min-width:120px;font-weight:700;
-      box-shadow:0 6px 16px rgba(229,9,20,.28);
-      transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      background:var(--memory-red);color:#fff;border:none;cursor:pointer;min-width:120px;font-weight:700;
+      box-shadow:0 6px 16px rgba(229,9,20,.28);transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
     }
     button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(229,9,20,.36)}
     button:active{transform:translateY(0)}
     button:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Cabeçalho de configuração inline - APENAS ENTIDADE */
-    .config{
-      display:grid;grid-template-columns:1fr 140px;gap:10px;
-      padding:12px 18px;background:#fff;border-bottom:1px solid var(--gray-200);
-    }
-    .config.hidden{display:none}
-    .config label{display:none}
-    .system-badge{
-      display:inline-block;padding:4px 10px;background:var(--memory-red);
-      color:#fff;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px
-    }
-
-    /* Responsivo */
     @media (max-width: 980px){
       .app{grid-template-columns:1fr;grid-template-areas:"topbar" "chat";height:100dvh}
       .right{display:none}
-      .config{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -171,7 +138,7 @@
       <img id="logoMemory" src="assets/logo.png" alt="Memory" />
       <div>
         <div class="title">Chat Multi Sistema</div>
-        <div class="subtitle">Detecção automática de módulos</div>
+        <div class="subtitle">Chatbot inteligente para insights, respostas e relatórios</div>
       </div>
     </div>
 
@@ -179,65 +146,55 @@
       <header>Como funciona</header>
       <div class="guide" id="guia">
         <section>
-          <h4>1. Inicie a sessão</h4>
-          <p>Informe apenas o nome da entidade. O sistema detectará automaticamente qual módulo usar baseado na sua pergunta.</p>
+          <h4>1. Escreva em linguagem natural</h4>
+          <p>Peça consultas, relatórios e análises. O sistema identifica automaticamente o módulo (frotas, folha, contabilidade, compras, patrimônio, tributos).</p>
         </section>
         <section>
-          <h4>2. Faça perguntas naturais</h4>
+          <h4>2. Dê contexto quando precisar</h4>
           <ul>
-            <li>O sistema identifica se é sobre frotas, folha, contabilidade, compras, patrimônio ou tributos.</li>
-            <li>Use palavras-chave como: veículos, servidores, empenhos, contratos, bens, IPTU.</li>
+            <li>Inclua datas, códigos, placas ou CNPJ/CPF se for relevante.</li>
+            <li>Especifique períodos, filtros e formatos de saída (tabela, resumo, PDF).</li>
           </ul>
         </section>
         <section>
-          <h4>3. Exemplos por módulo</h4>
+          <h4>3. Exemplos prontos</h4>
           <ul id="exemplosGuia"></ul>
         </section>
         <section>
-          <h4>4. Sistemas detectados automaticamente</h4>
-          <p><strong>SCF:</strong> Frotas e veículos<br>
-          <strong>SIP:</strong> Folha de pagamento<br>
-          <strong>SCP:</strong> Contabilidade<br>
-          <strong>SIC:</strong> Compras e licitações<br>
-          <strong>SPA:</strong> Patrimônio<br>
-          <strong>STM:</strong> Tributação</p>
+          <h4>4. Privacidade</h4>
+          <p>Somente dados autorizados para sua sessão são exibidos.</p>
         </section>
       </div>
     </aside>
 
     <main class="chat">
-      <div class="config" id="configBox">
-        <input type="text" id="entidade" value="Prefeitura A" placeholder="Nome da entidade" />
-        <button onclick="iniciarSessao()">Iniciar sessão</button>
-      </div>
-
-      <div class="suggestions" id="sugestoes"></div>
-
       <div id="chat"></div>
 
+      <!-- SUGESTÕES acima da barra de perguntas -->
+      <div class="suggestions" id="sugestoes"></div>
+
       <div class="controls">
-        <input type="text" id="mensagem" placeholder="Ex: Quantos veículos temos? Valor da folha? Empenhos do mês..." />
+        <input type="text" id="mensagem" placeholder="Ex.: Empenhos do mês, valor da folha, veículos com manutenção pendente..." />
         <button id="btnEnviar" onclick="enviarMensagem()">Enviar</button>
       </div>
     </main>
   </div>
 
   <script>
-    let entidadeData=null;
-    let sessionId=null;
-    const N8N_WEBHOOK="https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
+    let sessionId = null;
+    const N8N_WEBHOOK = "https://n8n.webcidadao.com.br/webhook/940fd847-38aa-4748-91b8-cff9043b353b";
 
-    const PROMPTS=[
-      "Quantos veículos temos cadastrados?",
-      "Qual o valor da folha de pagamento deste mês?",
-      "Listar empenhos do mês atual por secretaria.",
-      "Situação de cada veículo e última manutenção.",
+    const PROMPTS = [
+      "Quantos veículos estão ativos e a última manutenção de cada um?",
+      "Resumo da folha de pagamento do mês atual por secretaria.",
+      "Listar empenhos do mês por elemento de despesa.",
+      "Contratos que vencem nos próximos 30 dias.",
       "Itens de patrimônio sem depreciação registrada.",
-      "Processos de compra abertos acima de R$ 50.000.",
       "Receita de IPTU por bairro no último trimestre.",
+      "Despesas por natureza no bimestre corrente.",
+      "Processos de compra acima de R$ 50.000 abertos.",
       "Funcionários com adicional de insalubridade.",
-      "Despesas por elemento no bimestre corrente.",
-      "Contratos vencendo nos próximos 30 dias."
+      "Veículos com IPVA/seguro a vencer em 30 dias."
     ];
 
     function sorteio(array, n){
@@ -253,40 +210,60 @@
     function renderSugestoes(){
       const container=document.getElementById("sugestoes");
       const exemplosGuia=document.getElementById("exemplosGuia");
-      container.innerHTML="";
-      exemplosGuia.innerHTML="";
+      if(container) container.innerHTML="";
+      if(exemplosGuia) exemplosGuia.innerHTML="";
+
       const picks=sorteio(PROMPTS,4);
       picks.forEach(txt=>{
         const chip=document.createElement("button");
         chip.className="chip";
         chip.textContent=txt;
-        chip.onclick=()=>{document.getElementById("mensagem").value=txt;document.getElementById("mensagem").focus();}
+        chip.onclick=()=>{document.getElementById("mensagem").value=txt;document.getElementById("mensagem").focus();};
         container.appendChild(chip);
 
-        const li=document.createElement("li");
-        li.textContent=txt;
-        exemplosGuia.appendChild(li);
+        if(exemplosGuia){
+          const li=document.createElement("li");
+          li.textContent=txt;
+          exemplosGuia.appendChild(li);
+        }
       });
     }
 
-    function iniciarSessao(){
-      const entidadeInput=document.getElementById("entidade").value.trim();
-      if(!entidadeInput){alert("Preencha o nome da entidade");return;}
-      entidadeData={entidade:entidadeInput};
-      sessionId=entidadeData.entidade+"-"+Date.now();
-      document.getElementById("configBox").classList.add("hidden");
+    function adicionarMensagem(texto,tipo){
+      const chat=document.getElementById("chat");
+      const div=document.createElement("div");
+      div.className="message "+tipo;
+      texto = texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+      div.innerHTML = texto;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight; // rola apenas o conteúdo do chat
+    }
 
-      document.getElementById("chat").innerHTML=
-        '<div class="status">Sessão iniciada — <strong>'+entidadeData.entidade+
-        '</strong></div>'+
-        '<div class="status">💡 Faça sua pergunta. O sistema detectará automaticamente o módulo!</div>';
-      document.getElementById("mensagem").focus();
+    function mostrarStatus(){
+      const chat=document.getElementById("chat");
+      const id="status-"+Date.now();
+      const div=document.createElement("div");
+      div.id=id; div.className="status";
+      div.innerHTML='<span class="typing"><span></span><span></span><span></span></span> Processando...';
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+      return id;
+    }
+
+    function removerStatus(id){
+      const el=document.getElementById(id);
+      if(el) el.remove();
+    }
+
+    function desabilitarInput(disabled){
+      document.getElementById("mensagem").disabled=disabled;
+      document.getElementById("btnEnviar").disabled=disabled;
     }
 
     async function enviarMensagem(){
       const input=document.getElementById("mensagem");
       const msg=input.value.trim();
-      if(!msg)return;
+      if(!msg) return;
 
       adicionarMensagem(msg,'user');
       input.value="";
@@ -294,9 +271,10 @@
       const statusId=mostrarStatus();
 
       const payload={
-        entidade:entidadeData?.entidade||'Prefeitura Teste',
-        mensagem:msg,
-        sessionId:sessionId||('anon-'+Date.now())
+        entidade: "GLOBAL",   // compatibilidade c/ backend sem expor no UI
+        sistema:  "AUTO",     // detecção automática do módulo
+        mensagem: msg,
+        sessionId: sessionId || ('memory-' + Date.now())
       };
 
       try{
@@ -309,51 +287,23 @@
         const data=await res.json();
         removerStatus(statusId);
         if(data.error){
-          adicionarMensagem(data.text||"Erro desconhecido",'bot');
+          adicionarMensagem(data.text || "Erro desconhecido",'bot');
         }else{
-          adicionarMensagem(data.text||JSON.stringify(data),'bot');
+          adicionarMensagem(data.text || JSON.stringify(data),'bot');
         }
       }catch(error){
         removerStatus(statusId);
-        adicionarMensagem("Erro ao conectar com o servidor: "+error.message,'bot');
+        adicionarMensagem("Erro ao conectar com o servidor: " + error.message,'bot');
       }
       desabilitarInput(false);
       input.focus();
     }
 
-    function adicionarMensagem(texto,tipo){
-      const chat=document.getElementById("chat");
-      const div=document.createElement("div");
-      div.className="message "+tipo;
-      texto=texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-      div.innerHTML=texto;
-      chat.appendChild(div);
-      chat.scrollTop=chat.scrollHeight;
-    }
-
-    function mostrarStatus(){
-      const chat=document.getElementById("chat");
-      const id="status-"+Date.now();
-      const div=document.createElement("div");
-      div.id=id; div.className="status";
-      div.innerHTML='<span class="typing"><span></span><span></span><span></span></span> Analisando e processando...';
-      chat.appendChild(div);
-      chat.scrollTop=chat.scrollHeight;
-      return id;
-    }
-    function removerStatus(id){const el=document.getElementById(id); if(el) el.remove();}
-    function desabilitarInput(disabled){
-      document.getElementById("mensagem").disabled=disabled;
-      document.getElementById("btnEnviar").disabled=disabled;
-    }
-
     document.addEventListener('DOMContentLoaded',()=>{
+      sessionId = 'memory-' + Date.now();
       renderSugestoes();
       document.getElementById("mensagem").addEventListener("keydown",e=>{
         if(e.key==="Enter" && !e.shiftKey){e.preventDefault();enviarMensagem();}
-      });
-      document.getElementById("entidade").addEventListener("keydown",e=>{
-        if(e.key==="Enter"){e.preventDefault();iniciarSessao();}
       });
     });
   </script>
